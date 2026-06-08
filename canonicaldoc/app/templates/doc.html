@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}{{ team.name }} — CanonicalDoc{% endblock %}
+{% block body %}
+<header class="topbar">
+  <div class="brand">
+    <strong style="font-weight:400">{{ team.name }}</strong>
+    <span class="muted">/{{ team.slug }}</span>
+  </div>
+  <nav>
+    {% if not edit and billing.can_edit %}<a class="btn" href="/{{ team.slug }}?edit=true">Edit</a>{% endif %}
+    <a class="btn ghost" href="/logout">Sign out</a>
+  </nav>
+</header>
+
+{% if flash %}<p class="banner ok">{{ flash }}</p>{% endif %}
+
+{% if billing.state == "trialing" %}
+<div class="banner">
+  <span>Free trial — {{ billing.days_left }} day{{ "" if billing.days_left == 1 else "s" }} left.</span>
+  <form method="post" action="/{{ team.slug }}/billing/checkout">
+    <button class="btn small" type="submit">Subscribe</button>
+  </form>
+</div>
+{% elif billing.state == "locked" %}
+<div class="banner lock">
+  <span>Your trial has ended. The doc is read-only until you subscribe.</span>
+  <form method="post" action="/{{ team.slug }}/billing/checkout">
+    <button class="btn small" type="submit">Subscribe to keep editing</button>
+  </form>
+</div>
+{% elif billing.state == "active" %}
+<div class="banner subtle">
+  <span class="muted small">Subscription active</span>
+  <form method="post" action="/{{ team.slug }}/billing/portal">
+    <button class="btn ghost small" type="submit">Manage billing</button>
+  </form>
+</div>
+{% endif %}
+
+<main class="layout">
+  <article class="doc">
+    {% if edit %}
+    {% if conflict %}<p class="error conflict">{{ conflict }}</p>{% endif %}
+    <form method="post" action="/{{ team.slug }}/save">
+      <input type="hidden" name="base_version" value="{{ version }}">
+      <textarea name="body" spellcheck="false">{{ editor_body }}</textarea>
+      <div class="row">
+        <button type="submit">Save</button>
+        <a class="btn ghost" href="/{{ team.slug }}">Cancel</a>
+      </div>
+    </form>
+    {% else %}
+    <div class="rendered">{{ rendered | safe }}</div>
+    {% endif %}
+    {% if doc.updated_by %}
+    <p class="muted small">Last edited by {{ doc.updated_by }} at {{ doc.updated_at.strftime("%Y-%m-%d %H:%M UTC") }}</p>
+    {% endif %}
+  </article>
+
+  <aside class="side">
+    <h3>Team</h3>
+    <ul class="people">
+      {% for m in members %}<li>{{ m.email }}</li>{% endfor %}
+      {% for p in pending %}<li class="muted">{{ p.email }} <em>(invited)</em></li>{% endfor %}
+    </ul>
+    <form method="post" action="/{{ team.slug }}/invite" class="invite">
+      <input type="email" name="email" placeholder="invite teammate@company.com" required>
+      <button type="submit">Invite</button>
+    </form>
+  </aside>
+</main>
+{% endblock %}

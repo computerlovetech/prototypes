@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="center-card">
+  <h1>Check your email</h1>
+  <p class="lede">We sent a magic link to <strong>{{ email }}</strong>. Click it to sign in.</p>
+  {% if dev_link %}
+  <p class="muted small">Dev mode — email is off. Use this link:</p>
+  <p class="small"><a href="{{ dev_link }}" style="color:var(--stamp);word-break:break-all">{{ dev_link }}</a></p>
+  {% endif %}
+</div>
+{% endblock %}

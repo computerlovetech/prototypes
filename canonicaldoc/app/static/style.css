@@ -1,0 +1,195 @@
+/* ============================================================
+   CanonicalDoc — brand: "Sealed."
+   Paper + ink editorial, one stamp-red accent.
+   ============================================================ */
+:root {
+  --paper: #FFFFFF;
+  --paper-2: #F5F5F5;
+  --ink: #141414;
+  --ink-2: #555555;
+  --muted: #9A9A9A;
+  --line: #E6E6E6;
+  --stamp: #141414;
+  --stamp-deep: #000000;
+  --serif: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --radius: 8px;
+  --maxw: 1120px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { width: 100%; }
+a { color: var(--ink); text-decoration: none; }
+.muted { color: var(--muted); }
+.ink-light { color: var(--ink-2); }
+.small { font-size: 14px; }
+.error { color: var(--stamp-deep); }
+.conflict {
+  background: #fbeeea; border: 1px solid #f1c9bf;
+  padding: 10px 14px; border-radius: 10px;
+}
+
+/* ---- billing banner ---- */
+.banner {
+  max-width: 1000px; margin: 18px auto -8px; padding: 12px 18px;
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  background: var(--paper-2); border: 1px solid var(--line); border-radius: 10px;
+  font-size: 14.5px;
+}
+.banner form { margin: 0; }
+.banner.ok { background: #eef7ee; border-color: #cfe6cf; }
+.banner.lock { background: #fbeeea; border-color: #f1c9bf; }
+.banner.subtle { background: transparent; border: none; padding: 12px 18px 0; }
+
+/* ---- buttons ---- */
+.btn, button {
+  font-family: var(--sans);
+  font-size: 15px; font-weight: 500;
+  padding: 11px 18px;
+  background: var(--ink); color: var(--paper);
+  border: 1px solid var(--ink); border-radius: var(--radius);
+  cursor: pointer; display: inline-block;
+  transition: opacity .15s ease;
+}
+.btn:hover, button:hover { opacity: .85; }
+.btn.small { padding: 8px 15px; font-size: 14px; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn.ghost:hover { opacity: 1; background: var(--paper-2); }
+.btn.block { display: block; text-align: center; width: 100%; }
+
+input, textarea {
+  font-family: var(--sans); font-size: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: #fff; color: var(--ink);
+}
+input:focus, textarea:focus { outline: none; border-color: var(--ink); }
+
+/* ---- brand wordmark ---- */
+.brand { display: inline-flex; align-items: center; gap: 10px; }
+.wordmark { font-family: var(--sans); font-weight: 600; font-size: 21px; letter-spacing: -.2px; }
+
+/* ============================================================
+   LANDING PAGE
+   ============================================================ */
+.lp-nav {
+  max-width: var(--maxw); margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 28px 28px;
+}
+.lp-nav-links { display: flex; align-items: center; gap: 24px; font-size: 15px; }
+.lp-nav-links a:not(.btn):hover { color: var(--stamp); }
+
+/* hero — one calm centered column */
+.hero {
+  max-width: 640px; margin: 0 auto;
+  text-align: center;
+  padding: 96px 28px 104px;
+}
+.hero h1 {
+  font-family: var(--sans); font-weight: 600;
+  font-size: clamp(44px, 6.5vw, 76px); line-height: 1.02; letter-spacing: -2px;
+  margin: 0 0 28px;
+}
+.lede {
+  font-size: 20px; line-height: 1.6; color: var(--ink-2);
+  max-width: 30em; margin: 0 auto 36px;
+}
+.hero-form { display: flex; gap: 10px; max-width: 440px; margin: 0 auto; }
+.hero-form input { flex: 1; }
+.hero-form button { white-space: nowrap; }
+.hero-fine { font-size: 13px; color: var(--muted); margin-top: 16px; }
+
+/* three tenets — quiet, no boxes */
+.tenets {
+  max-width: 560px; margin: 0 auto;
+  padding: 8px 28px 96px;
+}
+.tenets p {
+  font-family: var(--sans); font-size: 17px; font-weight: 400; line-height: 1.5;
+  color: var(--ink); margin: 0;
+  padding: 20px 0; border-top: 1px solid var(--line);
+  display: flex; gap: 14px; align-items: baseline;
+}
+.tenets p:last-child { border-bottom: 1px solid var(--line); }
+
+/* pricing — two quiet lines */
+.pricing { max-width: 560px; margin: 0 auto; padding: 0 28px 104px; }
+.plans { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.plan {
+  padding: 8px 28px; text-align: center;
+}
+.plan:first-child { border-right: 1px solid var(--line); }
+.plan h4 { font-family: var(--sans); font-weight: 500; font-size: 16px; margin: 0 0 10px; }
+.price { font-family: var(--sans); font-weight: 600; font-size: 38px; letter-spacing: -1px; line-height: 1; margin: 0 0 22px; }
+.price span { font-family: var(--sans); font-size: 13px; color: var(--muted); display: block; margin-top: 10px; font-weight: 400; }
+
+.lp-foot {
+  max-width: var(--maxw); margin: 0 auto;
+  border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+  padding: 28px; font-size: 14px;
+}
+.lp-foot .brand { font-family: var(--serif); font-size: 18px; }
+
+@media (max-width: 560px) {
+  .hero { padding: 64px 24px 72px; }
+  .plans { grid-template-columns: 1fr; gap: 32px; }
+  .plan:first-child { border-right: none; }
+}
+
+/* ============================================================
+   AUTH PAGES (login / check email)
+   ============================================================ */
+.center-card { max-width: 440px; margin: 9vh auto; padding: 0 24px; text-align: center; }
+.center-card h1 { font-family: var(--sans); font-weight: 600; font-size: 36px; letter-spacing: -1px; margin: 0 0 .3em; }
+.center-card .lede, .center-card .muted { color: var(--ink-2); }
+.center-card form { display: flex; flex-direction: column; gap: 12px; margin-top: 26px; text-align: left; }
+
+/* ============================================================
+   THE DOC (app)
+   ============================================================ */
+.topbar {
+  max-width: 1000px; margin: 0 auto;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 28px; border-bottom: 1px solid var(--line);
+}
+.topbar .brand { font-family: var(--serif); font-size: 20px; }
+.topbar nav { display: flex; gap: 8px; }
+.layout {
+  max-width: 1000px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 260px; gap: 48px; padding: 40px 28px 80px;
+}
+.doc { min-width: 0; }
+.rendered { font-size: 17px; }
+.rendered h1, .rendered h2, .rendered h3 { font-family: var(--serif); font-weight: 400; }
+.rendered h1 { font-size: 40px; margin: 0 0 .3em; }
+.rendered h2 { font-size: 28px; margin: 1.4em 0 .4em; padding-bottom: .2em; border-bottom: 1px solid var(--line); }
+.rendered h3 { font-size: 22px; }
+.rendered table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+.rendered th, .rendered td { border: 1px solid var(--line); padding: 8px 12px; text-align: left; }
+.rendered th { background: var(--paper-2); }
+.rendered blockquote { border-left: 3px solid var(--stamp); margin: 1em 0; padding-left: 16px; color: var(--ink-2); font-style: italic; }
+.rendered code { background: var(--paper-2); padding: 1px 6px; border-radius: 5px; font-size: .9em; }
+.rendered pre { background: var(--paper-2); padding: 16px; border-radius: 10px; overflow: auto; }
+.rendered a { color: var(--stamp); text-decoration: underline; text-underline-offset: 2px; }
+textarea {
+  width: 100%; min-height: 68vh;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 14.5px; line-height: 1.7; resize: vertical;
+}
+.row { display: flex; gap: 10px; margin-top: 14px; align-items: center; }
+.side h3 { font-family: var(--serif); font-weight: 400; font-size: 19px; margin: 0 0 12px; }
+.people { list-style: none; padding: 0; margin: 0 0 18px; }
+.people li { padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.invite { display: flex; flex-direction: column; gap: 9px; }
+@media (max-width: 760px) { .layout { grid-template-columns: 1fr; gap: 32px; } }

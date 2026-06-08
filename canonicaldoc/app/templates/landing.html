@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block body %}
+<nav class="lp-nav">
+  <a class="brand" href="/">
+    <span class="wordmark">Canonical<span class="ink-light">Doc</span></span>
+  </a>
+  <div class="lp-nav-links">
+    <a href="#pricing">Pricing</a>
+    <a href="#start" class="btn small">Start</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <h1>One doc.<br>The whole truth.</h1>
+  <p class="lede">Everything your team needs to know — vision, strategy, roles, OKRs —
+    on one link that's always current.</p>
+  <form id="start" method="post" action="/login" class="hero-form">
+    <input type="email" name="email" placeholder="you@company.com" required>
+    <button type="submit">Start</button>
+  </form>
+  <p class="hero-fine">Free to start · magic-link sign in</p>
+</header>
+
+<section class="tenets">
+  <p>One link your whole team bookmarks once.</p>
+  <p>Every area of work has exactly one owner.</p>
+  <p>Open source. Self-hostable. Yours to keep.</p>
+</section>
+
+<section id="pricing" class="pricing">
+  <div class="plans">
+    <div class="plan">
+      <h4>Hosted</h4>
+      <p class="price">$20<span>per month · whole team</span></p>
+      <a href="#start" class="btn block">Start</a>
+    </div>
+    <div class="plan">
+      <h4>Self-host</h4>
+      <p class="price">Free<span>forever · AGPL</span></p>
+      <a href="https://github.com/kasperjunge/prototypes" class="btn ghost block">Get the code</a>
+    </div>
+  </div>
+</section>
+
+<footer class="lp-foot">
+  <span class="brand">CanonicalDoc</span>
+  <span class="muted">Open source under AGPL-3.0</span>
+</footer>
+{% endblock %}
