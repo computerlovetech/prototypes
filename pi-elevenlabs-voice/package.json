@@ -1,0 +1,23 @@
+{
+  "name": "pi-elevenlabs-voice",
+  "version": "0.1.0",
+  "description": "ElevenLabs voice input and output for Pi.",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "npm run typecheck"
+  },
+  "dependencies": {
+    "@earendil-works/pi-ai": "^0.79.0",
+    "@earendil-works/pi-coding-agent": "^0.79.0",
+    "@earendil-works/pi-tui": "^0.79.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^24.10.1"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
