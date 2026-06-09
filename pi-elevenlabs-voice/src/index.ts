@@ -29,7 +29,7 @@ const extension: ExtensionFactory = (pi: ExtensionAPI) => {
       return;
     }
 
-    ctx.ui.setStatus("voice", `voice: ready ${config.shortcut}`);
+    ctx.ui.setStatus("voice", `voice: ready ${displayShortcut(config.continuousShortcut)}`);
   });
 
   pi.on("session_shutdown", async () => {
@@ -48,16 +48,23 @@ const extension: ExtensionFactory = (pi: ExtensionAPI) => {
   pi.on("message_end", (event) => handleFinalMessage(event));
 
   pi.registerShortcut(config.shortcut as KeyId, {
-    description: "Record a voice message",
+    description: "Record a timed voice message",
     handler: async (ctx) => {
       await recordAndSend(pi, recorder, tts, ctx);
+    }
+  });
+
+  pi.registerShortcut(config.continuousShortcut as KeyId, {
+    description: "Toggle continuous voice recording",
+    handler: async (ctx) => {
+      await toggleRecording(pi, recorder, tts, ctx);
     }
   });
 
   pi.registerCommand("voice", {
     description: "Control ElevenLabs voice input and output",
     getArgumentCompletions: (prefix) => {
-      const options = ["status", "test", "record", "interrupt", "help"];
+      const options = ["status", "test", "start", "stop", "record", "interrupt", "help"];
       return options
         .filter((option) => option.startsWith(prefix.trim()))
         .map((option) => ({ value: option, label: option }));
@@ -75,6 +82,14 @@ const extension: ExtensionFactory = (pi: ExtensionAPI) => {
       }
       if (command === "record") {
         await recordAndSend(pi, recorder, tts, ctx);
+        return;
+      }
+      if (command === "start") {
+        await startRecording(recorder, tts, ctx);
+        return;
+      }
+      if (command === "stop") {
+        await stopRecordingAndSend(pi, recorder, ctx);
         return;
       }
       if (command === "interrupt") {
@@ -136,9 +151,11 @@ const extension: ExtensionFactory = (pi: ExtensionAPI) => {
     const problems = diagnostics();
     const lines = [
       `Voice: ${problems.length === 0 ? "ready" : "setup needed"}`,
-      `Shortcut: ${config.shortcut}`,
+      `Timed shortcut: ${displayShortcut(config.shortcut)}`,
+      `Continuous shortcut: ${displayShortcut(config.continuousShortcut)}`,
       `TTS mode: ${config.ttsMode}`,
       `Record seconds: ${config.recordSeconds}`,
+      `Listening: ${recorder.isRecording ? "yes" : "no"}`,
       `Voice ID: ${config.voiceId}`,
       problems.length > 0 ? `Problems: ${problems.join("; ")}` : undefined
     ].filter(Boolean);
@@ -151,8 +168,12 @@ const extension: ExtensionFactory = (pi: ExtensionAPI) => {
       [
         "/voice status - show setup and mode",
         "/voice test - speak a short test phrase",
-        "/voice record - record and send a voice message",
-        "/voice interrupt - stop speech and abort the current turn"
+        "/voice start - start listening",
+        "/voice stop - stop listening, transcribe, and send",
+        "/voice record - timed recording, then transcribe and send",
+        "/voice interrupt - stop speech and abort the current turn",
+        `${displayShortcut(config.continuousShortcut)} - start/stop continuous listening`,
+        `${displayShortcut(config.shortcut)} - timed recording`
       ].join("\n"),
       "info"
     );
@@ -167,6 +188,53 @@ const extension: ExtensionFactory = (pi: ExtensionAPI) => {
   }
 };
 
+async function toggleRecording(
+  pi: ExtensionAPI,
+  recorder: VoiceRecorder,
+  tts: ElevenLabsTts,
+  ctx: ExtensionContext
+): Promise<void> {
+  if (recorder.isRecording) {
+    await stopRecordingAndSend(pi, recorder, ctx);
+  } else {
+    await startRecording(recorder, tts, ctx);
+  }
+}
+
+async function startRecording(
+  recorder: VoiceRecorder,
+  tts: ElevenLabsTts,
+  ctx: ExtensionContext
+): Promise<void> {
+  try {
+    tts.interrupt();
+    await recorder.start();
+    ctx.ui.setStatus("voice", "voice: listening");
+    ctx.ui.notify("Listening. Press Control+Option+C again, or run /voice stop, to send.", "info");
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    ctx.ui.notify(`Voice input failed: ${message}`, "error");
+    ctx.ui.setStatus("voice", "voice: ready");
+  }
+}
+
+async function stopRecordingAndSend(
+  pi: ExtensionAPI,
+  recorder: VoiceRecorder,
+  ctx: ExtensionContext
+): Promise<void> {
+  try {
+    ctx.ui.setStatus("voice", "voice: transcribing");
+    const transcript = await recorder.stopAndTranscribe();
+    sendTranscript(pi, ctx, transcript);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    ctx.ui.notify(`Voice input failed: ${message}`, "error");
+  } finally {
+    ctx.ui.setStatus("voice", "voice: ready");
+  }
+}
+
 async function recordAndSend(
   pi: ExtensionAPI,
   recorder: VoiceRecorder,
@@ -176,12 +244,10 @@ async function recordAndSend(
   try {
     tts.interrupt();
     ctx.ui.setStatus("voice", "voice: listening");
-    ctx.ui.notify("Listening...", "info");
+    ctx.ui.notify("Listening for the timed recording duration...", "info");
 
     const transcript = await recorder.recordAndTranscribe();
-    const message = `<voice>${transcript}</voice>`;
-    pi.sendUserMessage(message, ctx.isIdle() ? undefined : { deliverAs: "steer" });
-    ctx.ui.notify(`Heard: ${transcript}`, "info");
+    sendTranscript(pi, ctx, transcript);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     ctx.ui.notify(`Voice input failed: ${message}`, "error");
@@ -189,5 +255,21 @@ async function recordAndSend(
     ctx.ui.setStatus("voice", "voice: ready");
   }
 }
+
+function sendTranscript(pi: ExtensionAPI, ctx: ExtensionContext, transcript: string): void {
+  const message = `<voice>${transcript}</voice>`;
+  pi.sendUserMessage(message, ctx.isIdle() ? undefined : { deliverAs: "steer" });
+  ctx.ui.notify(`Heard: ${transcript}`, "info");
+}
+
+function displayShortcut(shortcut: string): string {
+  if (process.platform !== "darwin") return shortcut;
+  return shortcut
+    .replace(/\bctrl\b/gi, "Control")
+    .replace(/\balt\b/gi, "Option")
+    .replace(/\+/g, "+")
+    .replace(/\bv\b/gi, "V");
+}
+
 
 export default extension;

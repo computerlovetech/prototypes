@@ -1,11 +1,24 @@
-import { spawn } from "node:child_process";
+import { spawn, type ChildProcess } from "node:child_process";
 import { readFile, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { VoiceConfig } from "./config.ts";
 
 export class VoiceRecorder {
+  private active:
+    | {
+        dir: string;
+        audioFile: string;
+        process: ChildProcess;
+        done: Promise<void>;
+      }
+    | undefined;
+
   constructor(private readonly config: VoiceConfig) {}
+
+  get isRecording(): boolean {
+    return this.active !== undefined;
+  }
 
   async recordAndTranscribe(): Promise<string> {
     if (!this.config.apiKey) {
@@ -23,7 +36,43 @@ export class VoiceRecorder {
     }
   }
 
+  async start(): Promise<void> {
+    if (this.active) return;
+    if (!this.config.apiKey) {
+      throw new Error("ELEVENLABS_API_KEY is not set");
+    }
+
+    const dir = await mkdtemp(join(tmpdir(), "pi-voice-recording-"));
+    const audioFile = join(dir, "utterance.wav");
+    const { child, done } = this.spawnRecorder(audioFile, false);
+    this.active = { dir, audioFile, process: child, done };
+  }
+
+  async stopAndTranscribe(): Promise<string> {
+    const active = this.active;
+    if (!active) {
+      throw new Error("Voice recorder is not listening");
+    }
+
+    this.active = undefined;
+    if (!active.process.killed) {
+      active.process.kill("SIGINT");
+    }
+
+    try {
+      await active.done;
+      return await this.transcribe(active.audioFile);
+    } finally {
+      await rm(active.dir, { recursive: true, force: true });
+    }
+  }
+
   private async record(audioFile: string): Promise<void> {
+    const { done } = this.spawnRecorder(audioFile, true);
+    await done;
+  }
+
+  private spawnRecorder(audioFile: string, timed: boolean): { child: ChildProcess; done: Promise<void> } {
     const args = process.platform === "darwin"
       ? [
           "-y",
@@ -31,8 +80,6 @@ export class VoiceRecorder {
           "avfoundation",
           "-i",
           this.config.ffmpegInput,
-          "-t",
-          String(this.config.recordSeconds),
           "-ac",
           "1",
           "-ar",
@@ -45,8 +92,6 @@ export class VoiceRecorder {
           "alsa",
           "-i",
           "default",
-          "-t",
-          String(this.config.recordSeconds),
           "-ac",
           "1",
           "-ar",
@@ -54,7 +99,14 @@ export class VoiceRecorder {
           audioFile
         ];
 
-    await run("ffmpeg", args);
+    if (timed) {
+      const outputIndex = args.length - 1;
+      args.splice(outputIndex, 0, "-t", String(this.config.recordSeconds));
+    }
+
+    const child = spawn("ffmpeg", args, { stdio: "ignore" });
+    const done = waitForRecorder(child);
+    return { child, done };
   }
 
   private async transcribe(audioFile: string): Promise<string> {
@@ -85,13 +137,12 @@ export class VoiceRecorder {
   }
 }
 
-async function run(command: string, args: string[]): Promise<void> {
+async function waitForRecorder(child: ChildProcess): Promise<void> {
   await new Promise<void>((resolve, reject) => {
-    const child = spawn(command, args, { stdio: "ignore" });
     child.once("error", reject);
     child.once("exit", (code, signal) => {
-      if (code === 0) resolve();
-      else reject(new Error(`${command} exited with ${code ?? signal}`));
+      if (code === 0 || signal === "SIGINT" || signal === "SIGTERM") resolve();
+      else reject(new Error(`ffmpeg exited with ${code ?? signal}`));
     });
   });
 }

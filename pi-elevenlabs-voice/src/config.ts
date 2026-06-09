@@ -8,6 +8,7 @@ export interface VoiceConfig {
   sttModelId: string;
   languageCode: string | undefined;
   shortcut: string;
+  continuousShortcut: string;
   recordSeconds: number;
   ttsMode: "off" | "final" | "stream";
   ffmpegInput: string;
@@ -23,6 +24,7 @@ export function loadConfig(): VoiceConfig {
     sttModelId: process.env.ELEVENLABS_STT_MODEL_ID ?? "scribe_v2",
     languageCode: process.env.ELEVENLABS_LANGUAGE || undefined,
     shortcut: process.env.PI_VOICE_SHORTCUT ?? "ctrl+alt+v",
+    continuousShortcut: process.env.PI_VOICE_CONTINUOUS_SHORTCUT ?? "ctrl+alt+c",
     recordSeconds: readNumber("PI_VOICE_RECORD_SECONDS", 8),
     ttsMode: readTtsMode(process.env.PI_VOICE_TTS_MODE),
     ffmpegInput: process.env.PI_VOICE_FFMPEG_INPUT ?? ":0",
