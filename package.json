@@ -1,0 +1,10 @@
+{
+  "name": "computerlovetech-prototypes",
+  "version": "0.1.0",
+  "private": true,
+  "pi": {
+    "extensions": [
+      "./pi-elevenlabs-voice/src/index.ts"
+    ]
+  }
+}
