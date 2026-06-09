@@ -21,6 +21,9 @@ export class VoiceRecorder {
   }
 
   async recordAndTranscribe(): Promise<string> {
+    if (this.active) {
+      throw new Error("Voice recorder is already listening");
+    }
     if (!this.config.apiKey) {
       throw new Error("ELEVENLABS_API_KEY is not set");
     }

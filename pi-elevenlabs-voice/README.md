@@ -8,8 +8,8 @@ This is a native Pi extension. It speaks Pi's assistant replies through ElevenLa
 
 - Pi speaks assistant replies aloud.
 - `/voice record` records a short utterance, transcribes it, and sends it to Pi.
-- `Control+Option+V` records a timed utterance in the terminal UI.
-- `Control+Option+C` toggles continuous listening: press once to start, press again to stop and send.
+- `Control+Option+V` is hold-to-talk when the terminal reports key-release events. If release events are not available, it auto-stops after the timed recording duration.
+- `Control+Option+C` toggles continuous listening: press once to start, press again to stop and send. This is the most reliable keyboard path.
 - `/voice start` and `/voice stop` do the same thing as the toggle shortcut.
 - `/voice interrupt` stops playback and aborts the current Pi turn.
 - `/voice test` verifies TTS playback.
@@ -51,11 +51,13 @@ Then inside Pi:
 /voice record
 ```
 
-Or press timed voice input:
+For hold-to-talk, press:
 
 ```text
 Control+Option+V
 ```
+
+Release the keys to stop and send. If your terminal does not report key release, the extension auto-stops after `PI_VOICE_RECORD_SECONDS`.
 
 For continuous listening, press:
 
@@ -96,7 +98,7 @@ Environment variables:
 | `ELEVENLABS_TTS_MODEL_ID` | `eleven_multilingual_v2` | TTS model |
 | `ELEVENLABS_STT_MODEL_ID` | `scribe_v2` | STT model |
 | `ELEVENLABS_LANGUAGE` | auto | Optional language code |
-| `PI_VOICE_SHORTCUT` | `ctrl+alt+v` | Timed recording shortcut. On macOS this is displayed as `Control+Option+V`. |
+| `PI_VOICE_SHORTCUT` | `ctrl+alt+v` | Hold-to-talk shortcut when key-release events are available. On macOS this is displayed as `Control+Option+V`. |
 | `PI_VOICE_CONTINUOUS_SHORTCUT` | `ctrl+alt+c` | Continuous start/stop recording shortcut. On macOS this is displayed as `Control+Option+C`. |
 | `PI_VOICE_RECORD_SECONDS` | `8` | Recording length per utterance |
 | `PI_VOICE_TTS_MODE` | `final` | `final`, `stream`, or `off` |
